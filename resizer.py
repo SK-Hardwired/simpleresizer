@@ -7,9 +7,6 @@ from multiprocessing.dummy import Pool as ThreadPool
 import time
 import signal
 
-def init_worker():
-    signal.signal(signal.SIGINT, signal.SIG_IGN)
-
 def resizer(cur_file):
     if 'resized' in cur_file : return None
     image = cv2.imread(cur_file)
@@ -66,23 +63,17 @@ flist = [F+"\\"+e for e in flist]
 if os.path.isdir(F+"\\Resized") == False:
     os.mkdir(os.path.dirname(F) + "\\Resized\\")
 print ('Files to be processed:', len(flist))
-print ('Writting resized images to: ', os.path.dirname(F) + "\\Resized\\")
+print ('Writting resized images to: ', F + "\\Resized\\")
 print ('Trying to use',os.cpu_count(),'CPUs. If your system has GPU which OpenCV supports, it may use some GPU power. May be...')
 print ('Press ALT+F4 for EMERGENCY BRAKE (will close terminal)')
 start = time.time()
 #sys.exit()
 pool = ThreadPool(os.cpu_count())
-try:
-    pool.map(resizer,flist)
-except KeyboardInterrupt:
-    print ("\nCaught KeyboardInterrupt, terminating workers")
-    pool.terminate()
-    pool.join()
 
-else:
-    print ("\nQuitting normally")
-    pool.close()
-    pool.join()
+pool.map(resizer,flist)
+print ("\nQuitting normally")
+pool.close()
+pool.join()
 
 end = time.time()
 print ('\nExecuted in: ' + str(round(end-start,3))+'s')
