@@ -5,3 +5,5 @@ Usage:
 Enter "resizer.py image_folder_path <scale (percent)>"
 
 For example "resizer.py D:\Pictures 50" it sill scale all files 50%
+
+[Win64 executable download](../blob/master/dist/resizer.exe) 
