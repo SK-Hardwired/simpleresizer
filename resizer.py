@@ -75,12 +75,12 @@ pool = ThreadPool(os.cpu_count())
 try:
     pool.map(resizer,flist)
 except KeyboardInterrupt:
-    print ("Caught KeyboardInterrupt, terminating workers")
+    print ("\nCaught KeyboardInterrupt, terminating workers")
     pool.terminate()
     pool.join()
 
 else:
-    print ("Quitting normally")
+    print ("\nQuitting normally")
     pool.close()
     pool.join()
 
