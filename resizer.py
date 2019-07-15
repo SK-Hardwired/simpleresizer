@@ -40,6 +40,7 @@ args = parser.parse_args()
 F = args.infolder
 s = args.s
 resizer.counter = 0
+fsize = 0
 
 if s <=0 or s == 100 :
     print ("Wrong scaling factor entered. It can't be <=0 or 100")
@@ -53,16 +54,17 @@ if len(flist) == 0 :
     sys.exit()
 flist.sort()
 flist = [F+"\\"+e for e in flist]
+for x in flist:
+    fsize += os.stat(x).st_size
 #print (os.path.dirname(flist[1]))
 #print (os.path.basename(flist[1]))
 #sys.exit()
 
 F = PureWindowsPath(F)
-print (os.path.isdir(F))
-
 if os.path.isdir(F / 'Resized') == False:
     os.mkdir(F / 'Resized')
 print ('Files to be processed:', len(flist))
+print ('Total files size to be processed:',round(fsize/1024/1024,3), 'MB')
 print ('Writting resized images to: ', F / 'Resized')
 print ('Trying to use',os.cpu_count(),'threads.')
 print ('Press ALT+F4 as EMERGENCY BRAKE (will close terminal)')
@@ -70,13 +72,12 @@ start = time.time()
 #sys.exit()
 pool = ThreadPool(os.cpu_count())
 #pool = ThreadPool()
-
-pool.map(resizer,flist)
-print ("\nQuitting normally")
+#pool.map_async(resizer,flist)
+pool.imap(resizer,flist)
 pool.close()
 pool.join()
-
 end = time.time()
 print ('\nExecuted in: ' + str(round(end-start,3))+'s')
 print ('Files processed: ' + str(len(flist)) + ' Average per file: ' + str(round(((end-start)/len(flist)),3)) + 's')
+print ('Average data processing speed (source):',round(fsize/1024/1024/(end-start),3),'MB/sec')
 sys.exit()
