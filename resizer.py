@@ -1,26 +1,21 @@
-import cv2
+from PIL import Image
 import argparse
 import os
 import sys
 from multiprocessing import pool
 from multiprocessing.dummy import Pool as ThreadPool
 import time
-import signal
 
 def resizer(cur_file):
     if 'resized' in cur_file : return None
-    image = cv2.imread(cur_file)
-    width = int(image.shape[1] * s / 100)
-    height = int(image.shape[0] * s / 100)
-    image = cv2.UMat(image)
-
-    dsize = (width, height)
+    image = Image.open(cur_file)
+    (width, height) = (int(image.width * s / 100), int(image.height * s / 100))
     if s < 100:
-        output = cv2.resize(image, dsize, interpolation=cv2.INTER_AREA)
+        output = image.resize((width, height), resample=Image.LANCZOS)
     else :
-        output = cv2.resize(image, dsize, interpolation=cv2.INTER_CUBIC)
+        output = image.resize((width, height), resample=Image.BICUBIC)
     wfile = os.path.dirname(cur_file) + "\\Resized\\" + os.path.basename(cur_file)
-    cv2.imwrite(wfile,output, [cv2.IMWRITE_JPEG_QUALITY, 80])
+    output.save(wfile, "JPEG", quality=85, exif=image.info['exif'])
     resizer.counter += 1
     sys.stdout.write ('\rProcessed ' + str(resizer.counter) + ' of ' + str(len(flist)))
     #sys.stdout.write ('    Written: ' + wfile)
@@ -69,6 +64,7 @@ print ('Press ALT+F4 for EMERGENCY BRAKE (will close terminal)')
 start = time.time()
 #sys.exit()
 pool = ThreadPool(os.cpu_count())
+#pool = ThreadPool()
 
 pool.map(resizer,flist)
 print ("\nQuitting normally")

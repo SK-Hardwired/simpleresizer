@@ -1,5 +1,5 @@
 # simpleresizer
-Simple cmd tool to resize images using opencv with GPU available accel
+Simple cmd tool to resize images using PILLOW-SIMD library
 
 Usage:
 Enter "resizer.py image_folder_path <scale (percent)>"
