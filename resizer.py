@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from PIL import Image
+import psutil
 import argparse
 import os
 from pathlib import Path, PureWindowsPath
@@ -7,6 +8,9 @@ import sys
 from multiprocessing import pool
 from multiprocessing.dummy import Pool as ThreadPool
 import time
+
+parent = psutil.Process()
+parent.nice(psutil.BELOW_NORMAL_PRIORITY_CLASS)
 
 def resizer(cur_file):
     if 'resized' in cur_file : return None
@@ -30,10 +34,9 @@ def jpgfilter(x):
     return False
 
 #Main program
-parser = argparse.ArgumentParser(description='Barch Opencv resizer',)
-
-parser.add_argument('infolder',help='Path to target folder')
-parser.add_argument('s', type=int, help='Scale factor (percent)')
+parser = argparse.ArgumentParser(description='Ultra-fast batch JPEG resizer with EXIF preserved',)
+parser.add_argument('infolder',help='Path to source folder')
+parser.add_argument('s', type=int, help='Scale factor (percent). Only keep aspect ratio')
 
 args = parser.parse_args()
 
@@ -50,7 +53,7 @@ iflist = os.listdir(F)
 
 flist = [x for x in iflist if '.jpg' in x or '.JPG' in x or '.jpeg' in x or '.JPEG' in x]
 if len(flist) == 0 :
-    print ("No JPEG images in directory. Exiting")
+    print ("No JPEG images in source folder. Exiting")
     sys.exit()
 flist.sort()
 flist = [F+"\\"+e for e in flist]
@@ -73,7 +76,7 @@ start = time.time()
 pool = ThreadPool(os.cpu_count())
 #pool = ThreadPool()
 #pool.map_async(resizer,flist)
-pool.imap(resizer,flist)
+pool.imap_unordered(resizer,flist)
 pool.close()
 pool.join()
 end = time.time()
